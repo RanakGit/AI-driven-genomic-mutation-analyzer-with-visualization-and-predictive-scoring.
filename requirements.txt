@@ -1,0 +1,10 @@
+biopython>=1.79
+scikit-learn>=1.2
+numpy>=1.24
+flask>=2.2
+plotly>=5.14
+pandas>=2.0
+joblib>=1.2
+pytest>=7.0
+requests>=2.30
+xgboost>=1.7

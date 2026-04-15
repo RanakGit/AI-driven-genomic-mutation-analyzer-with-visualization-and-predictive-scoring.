@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartVariant - History</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Analysis History</h2>
+                <a href="{{ url_for('index') }}" style="color:#2c7be5; font-weight:600;">Back to home</a>
+            </div>
+
+            <div class="table-zone">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Timestamp</th><th>Ref</th><th>Query</th><th>SNP</th><th>INS</th><th>DEL</th><th>Risk</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in history %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>{{ row[3] }}</td>
+                            <td>{{ row[4] }}</td>
+                            <td>{{ row[5] }}</td>
+                            <td>{{ row[6] }}</td>
+                            <td>{{ '%.2f' | format(row[7] or 0) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="footer">SmartVariant analysis audit trail</footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartVariant - Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Analysis Results</h2>
+                <a href="{{ url_for('index') }}" style="color:#2c7be5; font-weight:600;">&larr; Back home</a>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top:12px;">
+                <div><strong>Reference ID:</strong> {{ reference_id }}</div>
+                <div><strong>Query ID:</strong> {{ query_id }}</div>
+                <div><strong>Alignment Score:</strong> {{ result.alignment_score }}</div>
+                <div><strong>Risk Score:</strong> {{ '%.2f' | format(result.risk_score) }}</div>
+            </div>
+
+            <div style="margin-top: 18px;">
+                <h3>Summary</h3>
+                <div style="display:flex; gap: 8px;">
+                    <span class="badge badge-success">SNP {{ result.summary.SNP | default(0) }}</span>
+                    <span class="badge badge-warning">INS {{ result.summary.INS | default(0) }}</span>
+                    <span class="badge badge-danger">DEL {{ result.summary.DEL | default(0) }}</span>
+                </div>
+            </div>
+
+            <div class="table-zone" style="margin-top:16px;">
+                <table>
+                    <thead>
+                        <tr><th>Type</th><th>Ref Pos</th><th>Query Pos</th><th>Ref</th><th>Alt</th><th>ML Impact</th><th>Protein Impact</th><th>Final</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for v in result.variants %}
+                        <tr>
+                            <td>{{ v.type }}</td>
+                            <td>{{ v.position_ref }}</td>
+                            <td>{{ v.position_query }}</td>
+                            <td>{{ v.ref }}</td>
+                            <td>{{ v.alt }}</td>
+                            <td>{{ v.ml_impact }}</td>
+                            <td>{{ v.protein_impact }}</td>
+                            <td>{{ v.impact }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-wrap"><div id="chart"></div></div>
+            <script>
+                const chart = {{ chart | safe }};
+                Plotly.newPlot('chart', chart, {title: 'Mutation Type Distribution', margin: {t: 30}});
+            </script>
+
+            <div style="margin-top: 16px;">
+                <label for="snippet">Copy this variant summary:</label>
+                <textarea id="snippet" rows="5" readonly style="width:100%;">{{ result | tojson(indent=2) }}</textarea>
+                <button class="primary" style="width: auto; margin-top: 8px;" onclick="copySnippet()" type="button">Copy to clipboard</button>
+                <span id="copyMessage" style="margin-left: 10px; font-size: 0.9rem; color: #2374d7;"></span>
+            </div>
+        </div>
+
+        <footer class="footer">Powered by SmartVariant • File upload + ML + prediction</footer>
+    </div>
+
+    <script>
+        function copySnippet() {
+            const text = document.getElementById('snippet');
+            text.select();
+            text.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            document.getElementById('copyMessage').textContent = 'Copied!';
+            setTimeout(() => { document.getElementById('copyMessage').textContent = ''; }, 1800);
+        }
+    </script>
+</body>
+</html>

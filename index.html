@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartVariant - Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <section class="header">
+            <h1>SmartVariant</h1>
+            <p style="color:#586069;">AI-driven genomic mutation analyzer with visualization and predictive scoring.</p>
+            <div style="margin-top: 10px;"><a href="{{ url_for('metrics') }}" style="color:#2c7be5;font-weight:600;">Go to Metrics Dashboard</a></div>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="card error">
+              <ul>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2>Upload Sequence Pair</h2>
+            <div class="table-zone" style="margin-bottom: 12px;">
+                <div id="dropZone" style="border: 2px dashed #d2d8e2; border-radius: 10px; padding: 18px; text-align: center; background: #f8fafc;">
+                    <p style="margin: 0; color: #6a7d98;">Drag and drop your files here</p>
+                    <p style="font-size:12px; margin:4px 0">(FASTA / GenBank supported)</p>
+                </div>
+            </div>
+
+            <form id="uploadForm" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+                <label for="reference_seq">Reference sequence file (FASTA/GenBank)</label>
+                <input id="reference_seq" type="file" name="reference_seq" accept=".fasta,.fa,.fna,.gb,.gbk" required>
+
+                <label for="query_seq" style="margin-top:12px;">Query sequence file (FASTA/GenBank)</label>
+                <input id="query_seq" type="file" name="query_seq" accept=".fasta,.fa,.fna,.gb,.gbk" required>
+
+                <button class="primary" type="submit">Run Analysis</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Recent analysis history</h2>
+                <a href="{{ url_for('history') }}" style="font-size:0.9rem; color:#2c7be5;">See full history</a>
+            </div>
+            <div class="table-zone">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Time</th><th>Ref</th><th>Query</th><th>SNP</th><th>INS</th><th>DEL</th><th>Risk</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in history %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>{{ row[3] }}</td>
+                            <td>{{ row[4] }}</td>
+                            <td>{{ row[5] }}</td>
+                            <td>{{ row[6] }}</td>
+                            <td>{{ '%.2f' | format(row[7] or 0) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="footer">SmartVariant &bull; Built for clinical genomics workflows</footer>
+    </div>
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const refInput = document.getElementById('reference_seq');
+            const queryInput = document.getElementById('query_seq');
+            const form = document.getElementById('uploadForm');
+            const spinner = document.getElementById('spinnerOverlay');
+
+            ['dragenter', 'dragover'].forEach(ev => {
+                dropZone.addEventListener(ev, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    dropZone.style.borderColor = '#2c7be5';
+                    dropZone.style.backgroundColor = '#ebf4ff';
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(ev => {
+                dropZone.addEventListener(ev, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    dropZone.style.borderColor = '#d2d8e2';
+                    dropZone.style.backgroundColor = '#f8fafc';
+                });
+            });
+
+            dropZone.addEventListener('drop', (event) => {
+                const files = event.dataTransfer.files;
+                if (files.length > 0) {
+                    refInput.files = files;
+                }
+            });
+
+            form.addEventListener('submit', () => {
+                spinner.classList.add('active');
+            });
+        });
+    </script></body>
+</html>

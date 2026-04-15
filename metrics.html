@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartVariant - Metrics</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Metrics Dashboard</h2>
+            <a href="{{ url_for('index') }}" style="color:#2c7be5; font-weight:600;">Home</a>
+        </div>
+
+        <div id="metrics-charts" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; margin-top:16px;">
+            <div><h3>Risk Trend</h3><div id="risk-trend" style="height:300px"></div></div>
+            <div><h3>Mutation Load</h3><div id="mutation-load" style="height:300px"></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const runs = {{ runs | tojson }};
+    const labels = runs.map(r => r.timestamp);
+    Plotly.newPlot('risk-trend', [{ x: labels, y: runs.map(r=>r.risk), type: 'scatter', mode: 'lines+markers', line:{color:'#2c7be5'} }], {margin:{t:10}});
+    Plotly.newPlot('mutation-load', [
+        { x: labels, y: runs.map(r=>r.snp), name: 'SNP', type:'bar' },
+        { x: labels, y: runs.map(r=>r.ins), name: 'INS', type:'bar' },
+        { x: labels, y: runs.map(r=>r.del), name: 'DEL', type:'bar' }
+    ], {barmode:'stack', margin:{t:10}});
+</script>
+</body>
+</html>
